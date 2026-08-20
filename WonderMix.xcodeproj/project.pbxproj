@@ -1,0 +1,358 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* WonderMixApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* WonderMixApp.swift */; };
+		A10000000000000000000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* AppDelegate.swift */; };
+		A10000000000000000000003 /* CoreAudioHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* CoreAudioHelper.swift */; };
+		A10000000000000000000004 /* ProcessEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* ProcessEnumerator.swift */; };
+		A10000000000000000000005 /* OutputDeviceEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* OutputDeviceEnumerator.swift */; };
+		A10000000000000000000006 /* AppTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* AppTap.swift */; };
+		A10000000000000000000014 /* DeviceMixSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000014 /* DeviceMixSession.swift */; };
+		A10000000000000000000015 /* AudioLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000015 /* AudioLog.swift */; };
+		A10000000000000000000016 /* AudioDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* AudioDiagnostics.swift */; };
+		A10000000000000000000007 /* TapEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* TapEngine.swift */; };
+		A10000000000000000000008 /* MixerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* MixerController.swift */; };
+		A10000000000000000000012 /* AudioCapturePermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* AudioCapturePermission.swift */; };
+		A10000000000000000000013 /* PermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* PermissionView.swift */; };
+		A10000000000000000000009 /* RTMixer.c in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* RTMixer.c */; };
+		A1000000000000000000000A /* MixerPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* MixerPreferences.swift */; };
+		A1000000000000000000000B /* MixerPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* MixerPopoverView.swift */; };
+		A1000000000000000000000C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* SettingsView.swift */; };
+		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A20000000000000000000001 /* WonderMixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WonderMixApp.swift; sourceTree = "<group>"; };
+		A20000000000000000000002 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A20000000000000000000003 /* CoreAudioHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreAudioHelper.swift; sourceTree = "<group>"; };
+		A20000000000000000000004 /* ProcessEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessEnumerator.swift; sourceTree = "<group>"; };
+		A20000000000000000000005 /* OutputDeviceEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputDeviceEnumerator.swift; sourceTree = "<group>"; };
+		A20000000000000000000006 /* AppTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTap.swift; sourceTree = "<group>"; };
+		A20000000000000000000014 /* DeviceMixSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMixSession.swift; sourceTree = "<group>"; };
+		A20000000000000000000015 /* AudioLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioLog.swift; sourceTree = "<group>"; };
+		A20000000000000000000016 /* AudioDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioDiagnostics.swift; sourceTree = "<group>"; };
+		A20000000000000000000007 /* TapEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapEngine.swift; sourceTree = "<group>"; };
+		A20000000000000000000008 /* MixerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerController.swift; sourceTree = "<group>"; };
+		A20000000000000000000012 /* AudioCapturePermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapturePermission.swift; sourceTree = "<group>"; };
+		A20000000000000000000013 /* PermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionView.swift; sourceTree = "<group>"; };
+		A20000000000000000000009 /* RTMixer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = RTMixer.c; sourceTree = "<group>"; };
+		A2000000000000000000000E /* RTMixer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RTMixer.h; sourceTree = "<group>"; };
+		A2000000000000000000000A /* MixerPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerPreferences.swift; sourceTree = "<group>"; };
+		A2000000000000000000000B /* MixerPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerPopoverView.swift; sourceTree = "<group>"; };
+		A2000000000000000000000C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A2000000000000000000000D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A2000000000000000000000F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A20000000000000000000010 /* WonderMix.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WonderMix.entitlements; sourceTree = "<group>"; };
+		A20000000000000000000011 /* WonderMix-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WonderMix-Bridging-Header.h"; sourceTree = "<group>"; };
+		A30000000000000000000001 /* WonderMix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WonderMix.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A40000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A50000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				A50000000000000000000002 /* WonderMix */,
+				A50000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A50000000000000000000002 /* WonderMix */ = {
+			isa = PBXGroup;
+			children = (
+				A50000000000000000000004 /* App */,
+				A50000000000000000000005 /* Audio */,
+				A50000000000000000000006 /* UI */,
+				A50000000000000000000007 /* Persistence */,
+				A50000000000000000000008 /* Resources */,
+				A2000000000000000000000D /* Assets.xcassets */,
+				A20000000000000000000011 /* WonderMix-Bridging-Header.h */,
+			);
+			path = WonderMix;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A30000000000000000000001 /* WonderMix.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000004 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000001 /* WonderMixApp.swift */,
+				A20000000000000000000002 /* AppDelegate.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000005 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000003 /* CoreAudioHelper.swift */,
+				A20000000000000000000004 /* ProcessEnumerator.swift */,
+				A20000000000000000000005 /* OutputDeviceEnumerator.swift */,
+				A20000000000000000000006 /* AppTap.swift */,
+				A20000000000000000000014 /* DeviceMixSession.swift */,
+				A20000000000000000000007 /* TapEngine.swift */,
+				A20000000000000000000008 /* MixerController.swift */,
+				A20000000000000000000012 /* AudioCapturePermission.swift */,
+				A20000000000000000000015 /* AudioLog.swift */,
+				A20000000000000000000016 /* AudioDiagnostics.swift */,
+				A2000000000000000000000E /* RTMixer.h */,
+				A20000000000000000000009 /* RTMixer.c */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000006 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				A2000000000000000000000B /* MixerPopoverView.swift */,
+				A20000000000000000000013 /* PermissionView.swift */,
+				A2000000000000000000000C /* SettingsView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000007 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				A2000000000000000000000A /* MixerPreferences.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000008 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A2000000000000000000000F /* Info.plist */,
+				A20000000000000000000010 /* WonderMix.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A60000000000000000000001 /* WonderMix */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A80000000000000000000003 /* Build configuration list for PBXNativeTarget "WonderMix" */;
+			buildPhases = (
+				A70000000000000000000001 /* Sources */,
+				A40000000000000000000001 /* Frameworks */,
+				A70000000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WonderMix;
+			productName = WonderMix;
+			productReference = A30000000000000000000001 /* WonderMix.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A90000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					A60000000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = A80000000000000000000001 /* Build configuration list for PBXProject "WonderMix" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"pt-BR",
+			);
+			mainGroup = A50000000000000000000001;
+			productRefGroup = A50000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A60000000000000000000001 /* WonderMix */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A70000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000000000000000000000D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A70000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* WonderMixApp.swift in Sources */,
+				A10000000000000000000002 /* AppDelegate.swift in Sources */,
+				A10000000000000000000003 /* CoreAudioHelper.swift in Sources */,
+				A10000000000000000000004 /* ProcessEnumerator.swift in Sources */,
+				A10000000000000000000005 /* OutputDeviceEnumerator.swift in Sources */,
+				A10000000000000000000006 /* AppTap.swift in Sources */,
+				A10000000000000000000014 /* DeviceMixSession.swift in Sources */,
+				A10000000000000000000007 /* TapEngine.swift in Sources */,
+				A10000000000000000000008 /* MixerController.swift in Sources */,
+				A10000000000000000000012 /* AudioCapturePermission.swift in Sources */,
+				A10000000000000000000015 /* AudioLog.swift in Sources */,
+				A10000000000000000000016 /* AudioDiagnostics.swift in Sources */,
+				A10000000000000000000009 /* RTMixer.c in Sources */,
+				A1000000000000000000000A /* MixerPreferences.swift in Sources */,
+				A1000000000000000000000B /* MixerPopoverView.swift in Sources */,
+				A10000000000000000000013 /* PermissionView.swift in Sources */,
+				A1000000000000000000000C /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A80000000000000000000004 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A80000000000000000000005 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		A80000000000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WonderMix/Resources/WonderMix.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WonderMix/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wondermix.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "WonderMix/WonderMix-Bridging-Header.h";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/WonderMix/Audio",
+				);
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A80000000000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WonderMix/Resources/WonderMix.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WonderMix/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wondermix.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "WonderMix/WonderMix-Bridging-Header.h";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/WonderMix/Audio",
+				);
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A80000000000000000000001 /* Build configuration list for PBXProject "WonderMix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A80000000000000000000004 /* Debug */,
+				A80000000000000000000005 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A80000000000000000000003 /* Build configuration list for PBXNativeTarget "WonderMix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A80000000000000000000006 /* Debug */,
+				A80000000000000000000007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A90000000000000000000001 /* Project object */;
+}
