@@ -103,26 +103,43 @@ if (( UPLOAD == 1 )); then
   TAG="${TAG:-v${VERSION}}"
   echo "→ Publicando release ${TAG}…"
 
-  if gh release view "$TAG" >/dev/null 2>&1; then
-    gh release upload "$TAG" "$DIST/$ZIP_NAME" --clobber
-  else
-    gh release create "$TAG" "$DIST/$ZIP_NAME" \
-      --title "WonderMix ${VERSION}" \
-      --notes "$(cat <<EOF
+  NOTES="$(cat <<EOF
 ## WonderMix ${VERSION}
 
-### Instalar
+### Homebrew (recomendado)
+\`\`\`bash
+brew tap IgorYanko/wondermix https://github.com/IgorYanko/WonderMix
+brew install --cask wondermix
+\`\`\`
+
+Atualizar: \`brew upgrade --cask wondermix\`
+
+### curl
 \`\`\`bash
 curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/main/scripts/install.sh | bash
 \`\`\`
-
-Ou baixe \`WonderMix-macOS.zip\` e arraste \`WonderMix.app\` para \`/Applications\`.
 
 ### Após instalar
 1. Abra o app (ícone na barra de menu).
 2. Conceda **Gravação de Tela e Áudio do Sistema**.
 EOF
 )"
+
+  if gh release view "$TAG" >/dev/null 2>&1; then
+    gh release upload "$TAG" "$DIST/$ZIP_NAME" --clobber
+  else
+    gh release create "$TAG" "$DIST/$ZIP_NAME" \
+      --title "WonderMix ${VERSION}" \
+      --notes "$NOTES"
   fi
   echo "✓ Release ${TAG} publicado."
+
+  echo "→ Atualizando cask Homebrew…"
+  chmod +x "$ROOT/scripts/bump-cask.sh"
+  "$ROOT/scripts/bump-cask.sh" "$VERSION" "$DIST/$ZIP_NAME"
+  if ! git diff --quiet -- Casks/wondermix.rb; then
+    git add Casks/wondermix.rb
+    git commit -m "chore: bump Homebrew cask to ${VERSION}"
+    echo "  Commit do cask criado. Faça: git push"
+  fi
 fi

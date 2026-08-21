@@ -4,18 +4,26 @@ Mixer de áudio nativo para macOS — volume e dispositivo de saída **por aplic
 
 Sem drivers virtuais. Usa [Core Audio Process Tap](https://developer.apple.com/documentation/coreaudio/audiohardwarecreateprocesstap) (macOS 15+).
 
-## Instalar
+## Instalar (Homebrew)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/main/scripts/install.sh | bash
+brew tap IgorYanko/wondermix https://github.com/IgorYanko/WonderMix
+brew install --cask wondermix
 ```
 
-Isso baixa o `.zip` do [release mais recente](https://github.com/IgorYanko/WonderMix/releases/latest), instala em `/Applications/WonderMix.app` e remove a quarentena do Gatekeeper.
-
-Versão específica:
+### Atualizar
 
 ```bash
-VERSION=v1.0.0 curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/main/scripts/install.sh | bash
+brew update
+brew upgrade --cask wondermix
+```
+
+### Desinstalar
+
+```bash
+brew uninstall --cask wondermix
+# opcional — apaga preferências salvas:
+# brew uninstall --cask --zap wondermix
 ```
 
 ### Depois de instalar
@@ -25,13 +33,22 @@ VERSION=v1.0.0 curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/
    (Ajustes → Privacidade e Segurança → Gravação de Tela e Áudio do Sistema).
 3. Se o macOS bloquear na primeira abertura: botão direito no app → **Abrir** → Abrir.
 
-> O binário do release ainda **não é notarizado** pela Apple. O script de install remove `com.apple.quarantine` para evitar o bloqueio automático; a confirmação “Abrir mesmo assim” pode aparecer uma vez.
+> O binário ainda **não é notarizado** pela Apple. Homebrew (e o script curl) removem a quarentena; o aviso “Abrir mesmo assim” pode aparecer uma vez.
 
-### Desinstalar
+## Alternativa (curl)
+
+Sem Homebrew, o mesmo release instala com:
 
 ```bash
-pkill -x WonderMix 2>/dev/null || true
-rm -rf /Applications/WonderMix.app
+curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/main/scripts/install.sh | bash
+```
+
+Para **atualizar** via curl, rode o mesmo comando de novo — ele substitui `/Applications/WonderMix.app`. Não há checagem automática de versão; por isso o Homebrew é o caminho recomendado.
+
+Versão específica:
+
+```bash
+VERSION=v1.0.0 curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/main/scripts/install.sh | bash
 ```
 
 ## Requisitos
@@ -63,18 +80,18 @@ Para quem mantém o projeto:
 # Empacota dist/WonderMix-macOS.zip
 ./scripts/package.sh
 
-# Ou empacota e sobe um release da tag (precisa do gh autenticado)
+# Empacota, sobe o release e atualiza o cask do Homebrew
 ./scripts/package.sh --upload
 ```
 
-Ou crie uma tag — o GitHub Actions empacota e publica sozinho:
+Ou crie uma tag — o GitHub Actions empacota, publica o release e atualiza `Casks/wondermix.rb`:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.0.1
+git push origin v1.0.1
 ```
 
-O asset publicado deve se chamar **`WonderMix-macOS.zip`** (é o que o `install.sh` procura).
+O asset publicado deve se chamar **`WonderMix-macOS.zip`**. O cask em `Casks/wondermix.rb` precisa do `version` + `sha256` corretos para o `brew upgrade` funcionar.
 
 ## Arquitetura
 

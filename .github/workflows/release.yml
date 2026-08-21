@@ -5,11 +5,6 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
-    inputs:
-      tag:
-        description: "Tag a criar/publicar (ex: v1.0.0). Vazio = só empacota o HEAD."
-        required: false
-        default: ""
 
 permissions:
   contents: write
@@ -20,13 +15,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Precisa poder pushar o bump do cask de volta na main.
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
       - name: Package app
         run: |
-          chmod +x scripts/package.sh
+          chmod +x scripts/package.sh scripts/bump-cask.sh
           ./scripts/package.sh
 
       - name: Upload artifact
@@ -46,19 +45,25 @@ jobs:
           NOTES="$(cat <<EOF
           ## WonderMix ${VERSION}
 
-          ### Instalar com um comando
+          ### Homebrew (recomendado)
+          \`\`\`bash
+          brew tap IgorYanko/wondermix https://github.com/IgorYanko/WonderMix
+          brew install --cask wondermix
+          \`\`\`
+
+          Atualizar: \`brew upgrade --cask wondermix\`
+
+          ### curl
           \`\`\`bash
           curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/main/scripts/install.sh | bash
           \`\`\`
 
-          Ou baixe \`WonderMix-macOS.zip\` abaixo e arraste \`WonderMix.app\` para \`/Applications\`.
-
           ### Após instalar
           1. Abra o app (ícone na barra de menu).
-          2. Conceda **Gravação de Tela e Áudio do Sistema** em Ajustes → Privacidade e Segurança.
+          2. Conceda **Gravação de Tela e Áudio do Sistema**.
           3. Se o macOS bloquear na 1ª abertura: botão direito → Abrir.
 
-          > Build ad-hoc (sem notarização Apple). O script de install remove a quarentena do Gatekeeper.
+          > Build ad-hoc (sem notarização Apple).
           EOF
           )"
           if gh release view "$TAG" >/dev/null 2>&1; then
@@ -68,3 +73,26 @@ jobs:
               --title "WonderMix ${VERSION}" \
               --notes "$NOTES"
           fi
+
+      - name: Bump Homebrew cask on main
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          ./scripts/bump-cask.sh "$VERSION" dist/WonderMix-macOS.zip
+
+          if git diff --quiet -- Casks/wondermix.rb; then
+            echo "Cask já estava atualizado."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          ./scripts/bump-cask.sh "$VERSION" dist/WonderMix-macOS.zip
+          git add Casks/wondermix.rb
+          git commit -m "chore: bump Homebrew cask to ${VERSION}"
+          git push origin main
