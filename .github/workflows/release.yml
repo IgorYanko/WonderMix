@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag a criar/publicar (ex: v1.0.0). Vazio = só empacota o HEAD."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Package app
+        run: |
+          chmod +x scripts/package.sh
+          ./scripts/package.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WonderMix-macOS
+          path: dist/WonderMix-macOS.zip
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          NOTES="$(cat <<EOF
+          ## WonderMix ${VERSION}
+
+          ### Instalar com um comando
+          \`\`\`bash
+          curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/main/scripts/install.sh | bash
+          \`\`\`
+
+          Ou baixe \`WonderMix-macOS.zip\` abaixo e arraste \`WonderMix.app\` para \`/Applications\`.
+
+          ### Após instalar
+          1. Abra o app (ícone na barra de menu).
+          2. Conceda **Gravação de Tela e Áudio do Sistema** em Ajustes → Privacidade e Segurança.
+          3. Se o macOS bloquear na 1ª abertura: botão direito → Abrir.
+
+          > Build ad-hoc (sem notarização Apple). O script de install remove a quarentena do Gatekeeper.
+          EOF
+          )"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/WonderMix-macOS.zip --clobber
+          else
+            gh release create "$TAG" dist/WonderMix-macOS.zip \
+              --title "WonderMix ${VERSION}" \
+              --notes "$NOTES"
+          fi
