@@ -68,6 +68,41 @@ void RTMixer_DeviceMixSetSampleRate(RTDeviceMix * _Nonnull mix, double sampleRat
 void RTMixer_DeviceMixSetEnabled(RTDeviceMix * _Nonnull mix, bool enabled);
 void RTMixer_DeviceMixResetStats(RTDeviceMix * _Nonnull mix);
 
+/// Filter types for the equalizer biquads.
+typedef enum RTEQFilterType {
+    RT_EQ_FILTER_LOW_SHELF = 0,
+    RT_EQ_FILTER_PEAKING = 1,
+    RT_EQ_FILTER_HIGH_SHELF = 2
+} RTEQFilterType;
+
+/// Configuration for one equalizer band.
+typedef struct RTEQBand {
+    double frequency;
+    double gainDb;
+    double q;
+    RTEQFilterType type;
+} RTEQBand;
+
+#define RT_MAX_EQ_BANDS 16
+
+/// Updates the master equalizer settings for this device.
+/// Biquad coefficients are recalculated for the device's current sample rate
+/// and swapped atomically without locks or allocations.
+void RTMixer_DeviceMixSetEQ(
+    RTDeviceMix * _Nonnull mix,
+    bool enabled,
+    const RTEQBand * _Nullable bands,
+    uint32_t bandCount
+);
+
+/// Configures the master peak limiter / anti-clipping stage.
+void RTMixer_DeviceMixSetLimiter(
+    RTDeviceMix * _Nonnull mix,
+    bool enabled,
+    float thresholdDb,
+    float releaseMs
+);
+
 /// Called from the overload / IO-stopped property listeners, which also run on the
 /// IO thread and therefore must not log.
 void RTMixer_DeviceMixNoteOverload(RTDeviceMix * _Nonnull mix);

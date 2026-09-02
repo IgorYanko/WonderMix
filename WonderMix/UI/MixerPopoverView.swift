@@ -125,9 +125,25 @@ struct AppRowView: View {
     }
 }
 
+enum MixerPopoverTab: String, CaseIterable, Identifiable {
+    case mixer = "Mixer"
+    case equalizer = "Equalizador"
+    case settings = "Ajustes"
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .mixer: return "slider.horizontal.3"
+        case .equalizer: return "waveform"
+        case .settings: return "gearshape"
+        }
+    }
+}
+
 struct MixerPopoverView: View {
     @EnvironmentObject private var controller: MixerController
-    @State private var showsSettings = false
+    @State private var currentTab: MixerPopoverTab = .mixer
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -154,9 +170,9 @@ struct MixerPopoverView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            if showsSettings {
+            if currentTab != .mixer {
                 Button {
-                    showsSettings = false
+                    currentTab = .mixer
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 12, weight: .semibold))
@@ -165,10 +181,21 @@ struct MixerPopoverView: View {
                 .buttonStyle(.plain)
                 .help("Voltar ao mixer")
 
-                Text("Configurações")
+                Text(currentTab.rawValue)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(WonderMixTheme.ink)
                 Spacer()
+
+                if currentTab == .equalizer {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(controller.equalizerConfig.isEnabled ? WonderMixTheme.glow : WonderMixTheme.inkFaint)
+                            .frame(width: 7, height: 7)
+                        Text(controller.equalizerConfig.isEnabled ? "EQ Ativo" : "EQ Desligado")
+                            .font(.caption2.weight(.medium))
+                            .foregroundStyle(WonderMixTheme.inkMuted)
+                    }
+                }
             } else {
                 Text("WonderMix")
                     .font(.system(size: 15, weight: .bold))
@@ -189,13 +216,25 @@ struct MixerPopoverView: View {
 
     @ViewBuilder
     private var content: some View {
-        if showsSettings {
+        switch currentTab {
+        case .equalizer:
+            ScrollView {
+                EqualizerView()
+            }
+        case .settings:
             ScrollView {
                 SettingsPanelView()
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
             }
-        } else if !controller.isEnabled {
+        case .mixer:
+            mixerContent
+        }
+    }
+
+    @ViewBuilder
+    private var mixerContent: some View {
+        if !controller.isEnabled {
             disabledState
         } else if !controller.hasPermission {
             PermissionView(
@@ -266,26 +305,38 @@ struct MixerPopoverView: View {
     }
 
     private var footer: some View {
-        HStack {
-            Button {
-                showsSettings.toggle()
-            } label: {
-                Label(
-                    showsSettings ? "Mixer" : "Configurações",
-                    systemImage: showsSettings ? "slider.horizontal.3" : "gearshape"
-                )
-                .foregroundStyle(WonderMixTheme.ink)
+        HStack(spacing: 6) {
+            ForEach(MixerPopoverTab.allCases) { tab in
+                Button {
+                    currentTab = tab
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: tab.systemImage)
+                            .font(.system(size: 11, weight: .semibold))
+                        Text(tab.rawValue)
+                            .font(.system(size: 11, weight: currentTab == tab ? .bold : .medium))
+                    }
+                    .foregroundStyle(currentTab == tab ? WonderMixTheme.ink : WonderMixTheme.inkMuted)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule()
+                            .fill(currentTab == tab ? WonderMixTheme.fill : Color.clear)
+                    )
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
-            Spacer()
+
+            Spacer(minLength: 4)
+
             Button("Sair") {
                 NSApplication.shared.terminate(nil)
             }
             .buttonStyle(.plain)
-            .foregroundStyle(WonderMixTheme.ink)
+            .font(.caption)
+            .foregroundStyle(WonderMixTheme.inkFaint)
         }
-        .font(.callout)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
     }
 }

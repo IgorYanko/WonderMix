@@ -27,8 +27,11 @@
 		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* Assets.xcassets */; };
 		A10000000000000000000017 /* MixerRuntimePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000017 /* MixerRuntimePolicy.swift */; };
 		A10000000000000000000018 /* WonderMixTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000018 /* WonderMixTheme.swift */; };
+		A10000000000000000000019 /* EqualizerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* EqualizerModels.swift */; };
+		A1000000000000000000001A /* EqualizerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000001A /* EqualizerView.swift */; };
 		B10000000000000000000001 /* MixerPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001 /* MixerPreferencesTests.swift */; };
 		B10000000000000000000002 /* MixerRuntimePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000002 /* MixerRuntimePolicyTests.swift */; };
+		B10000000000000000000003 /* EqualizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000004 /* EqualizerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,10 +69,13 @@
 		A20000000000000000000011 /* WonderMix-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WonderMix-Bridging-Header.h"; sourceTree = "<group>"; };
 		A20000000000000000000017 /* MixerRuntimePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerRuntimePolicy.swift; sourceTree = "<group>"; };
 		A20000000000000000000018 /* WonderMixTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WonderMixTheme.swift; sourceTree = "<group>"; };
+		A20000000000000000000019 /* EqualizerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualizerModels.swift; sourceTree = "<group>"; };
+		A2000000000000000000001A /* EqualizerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualizerView.swift; sourceTree = "<group>"; };
 		A30000000000000000000001 /* WonderMix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WonderMix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B20000000000000000000001 /* MixerPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerPreferencesTests.swift; sourceTree = "<group>"; };
 		B20000000000000000000002 /* MixerRuntimePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerRuntimePolicyTests.swift; sourceTree = "<group>"; };
 		B20000000000000000000003 /* WonderMixTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WonderMixTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20000000000000000000004 /* EqualizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualizerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +153,7 @@
 				A20000000000000000000016 /* AudioDiagnostics.swift */,
 				A2000000000000000000000E /* RTMixer.h */,
 				A20000000000000000000009 /* RTMixer.c */,
+				A20000000000000000000019 /* EqualizerModels.swift */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -158,6 +165,7 @@
 				A2000000000000000000000B /* MixerPopoverView.swift */,
 				A20000000000000000000013 /* PermissionView.swift */,
 				A2000000000000000000000C /* SettingsView.swift */,
+				A2000000000000000000001A /* EqualizerView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -184,6 +192,7 @@
 			children = (
 				B20000000000000000000001 /* MixerPreferencesTests.swift */,
 				B20000000000000000000002 /* MixerRuntimePolicyTests.swift */,
+				B20000000000000000000004 /* EqualizerTests.swift */,
 			);
 			path = WonderMixTests;
 			sourceTree = "<group>";
@@ -299,6 +308,8 @@
 				A1000000000000000000000B /* MixerPopoverView.swift in Sources */,
 				A10000000000000000000013 /* PermissionView.swift in Sources */,
 				A1000000000000000000000C /* SettingsView.swift in Sources */,
+				A10000000000000000000019 /* EqualizerModels.swift in Sources */,
+				A1000000000000000000001A /* EqualizerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -308,6 +319,7 @@
 			files = (
 				B10000000000000000000001 /* MixerPreferencesTests.swift in Sources */,
 				B10000000000000000000002 /* MixerRuntimePolicyTests.swift in Sources */,
+				B10000000000000000000003 /* EqualizerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

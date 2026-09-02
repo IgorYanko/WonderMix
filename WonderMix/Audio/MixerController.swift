@@ -37,6 +37,8 @@ final class MixerController: ObservableObject {
             refresh(forceRebuild: false)
         }
     }
+    /// Master equalizer and output limiter configuration.
+    @Published var equalizerConfig: EqualizerConfiguration
     /// Shown in Settings when SMAppService register/unregister fails (common under Xcode).
     @Published private(set) var loginItemMessage: String?
 
@@ -62,7 +64,10 @@ final class MixerController: ObservableObject {
         isEnabled = preferences.isEnabled
         launchAtLogin = preferences.launchAtLogin
         showInactiveApps = preferences.showInactiveApps
+        let eq = preferences.equalizerConfig
+        equalizerConfig = eq
         isSyncingPreferences = false
+        engine.applyEqualizer(eq)
         permissionStatus = AudioCapturePermission.currentStatus()
         engine.onDevicesChange = { [weak self] in
             self?.scheduleRefresh(forceRebuild: false, delayNs: 300_000_000)
@@ -228,7 +233,71 @@ final class MixerController: ObservableObject {
     func resetAllStates() {
         preferences.resetAll()
         appStates.removeAll()
+        equalizerConfig = .default
+        engine.applyEqualizer(equalizerConfig)
         refresh(forceRebuild: true)
+    }
+
+    // MARK: - Equalizer Controls
+
+    func setEqualizerEnabled(_ enabled: Bool) {
+        equalizerConfig.isEnabled = enabled
+        saveAndApplyEqualizer()
+    }
+
+    func setEqualizerPreset(_ preset: EqualizerPreset) {
+        equalizerConfig.presetName = preset.name
+        equalizerConfig.bands = preset.bands
+        saveAndApplyEqualizer()
+    }
+
+    func setBandGain(index: Int, gain: Double) {
+        guard index >= 0 && index < equalizerConfig.bands.count else { return }
+        equalizerConfig.bands[index].gain = min(max(gain, -12.0), 12.0)
+        updatePresetNameAfterBandEdit()
+        saveAndApplyEqualizer()
+    }
+
+    func setBandQ(index: Int, q: Double) {
+        guard index >= 0 && index < equalizerConfig.bands.count else { return }
+        equalizerConfig.bands[index].q = min(max(q, 0.2), 10.0)
+        updatePresetNameAfterBandEdit()
+        saveAndApplyEqualizer()
+    }
+
+    func setBandFrequency(index: Int, frequency: Double) {
+        guard index >= 0 && index < equalizerConfig.bands.count else { return }
+        equalizerConfig.bands[index].frequency = min(max(frequency, 20.0), 20000.0)
+        updatePresetNameAfterBandEdit()
+        saveAndApplyEqualizer()
+    }
+
+    func setLimiterEnabled(_ enabled: Bool) {
+        equalizerConfig.isLimiterEnabled = enabled
+        saveAndApplyEqualizer()
+    }
+
+    func setLimiterThreshold(db: Float) {
+        equalizerConfig.limiterThresholdDb = min(max(db, -20.0), 0.0)
+        saveAndApplyEqualizer()
+    }
+
+    func resetEqualizer() {
+        equalizerConfig = .default
+        saveAndApplyEqualizer()
+    }
+
+    private func updatePresetNameAfterBandEdit() {
+        if let match = EqualizerPreset.matchingPreset(for: equalizerConfig.bands) {
+            equalizerConfig.presetName = match.name
+        } else {
+            equalizerConfig.presetName = EqualizerPreset.customName
+        }
+    }
+
+    private func saveAndApplyEqualizer() {
+        preferences.equalizerConfig = equalizerConfig
+        engine.applyEqualizer(equalizerConfig)
     }
 
     func state(for app: AudioApp) -> AppMixerState {

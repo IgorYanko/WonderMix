@@ -17,8 +17,10 @@ final class MixerPreferences {
     private let launchAtLoginKey = "wonderMix.launchAtLogin"
     private let showInactiveKey = "wonderMix.showInactiveApps"
     private let isEnabledKey = "wonderMix.isEnabled"
+    private let equalizerKey = "wonderMix.equalizerConfig"
 
     private var states: [String: AppMixerState] = [:]
+    private var cachedEqualizerConfig: EqualizerConfiguration?
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -69,9 +71,34 @@ final class MixerPreferences {
         persist()
     }
 
+    var equalizerConfig: EqualizerConfiguration {
+        get {
+            if let cached = cachedEqualizerConfig {
+                return cached
+            }
+            if let data = defaults.data(forKey: equalizerKey),
+               let decoded = try? JSONDecoder().decode(EqualizerConfiguration.self, from: data) {
+                cachedEqualizerConfig = decoded
+                return decoded
+            }
+            return .default
+        }
+        set {
+            cachedEqualizerConfig = newValue
+            if let data = try? JSONEncoder().encode(newValue) {
+                defaults.set(data, forKey: equalizerKey)
+            }
+        }
+    }
+
+    func resetEqualizer() {
+        equalizerConfig = .default
+    }
+
     func resetAll() {
         states.removeAll()
         persist()
+        resetEqualizer()
     }
 
     private func load() {

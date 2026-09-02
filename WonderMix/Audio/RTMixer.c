@@ -34,6 +34,20 @@ typedef struct RTDeviceMixStats {
     _Atomic uint32_t lastOutputChannels;
 } RTDeviceMixStats;
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+typedef struct RTBiquadCoeffs {
+    float b0, b1, b2, a1, a2;
+    bool active;
+} RTBiquadCoeffs;
+
+typedef struct RTBiquadState {
+    float s1;
+    float s2;
+} RTBiquadState;
+
 struct RTDeviceMix {
     RTTapSlot slots[RT_MIXER_SLOT_SETS][RT_MIXER_MAX_SLOTS];
     _Atomic uint32_t slotCounts[RT_MIXER_SLOT_SETS];
@@ -48,6 +62,22 @@ struct RTDeviceMix {
     uint32_t timebaseNumer;
     uint32_t timebaseDenom;
     RTDeviceMixStats stats;
+
+    // Equalizer
+    _Atomic bool eqEnabled;
+    _Atomic uint32_t eqBandCount;
+    _Atomic uint32_t activeCoeffSet;
+    RTBiquadCoeffs eqCoeffs[2][RT_MAX_EQ_BANDS];
+    RTBiquadState eqState[2][RT_MAX_EQ_BANDS];
+    RTEQBand storedBands[RT_MAX_EQ_BANDS];
+    uint32_t storedBandCount;
+
+    // Limiter
+    _Atomic bool limiterEnabled;
+    _Atomic float limiterThreshold;
+    _Atomic float limiterReleaseMs;
+    float limiterEnvelope;
+    float limiterCurrentGain;
 };
 
 /// One destination channel in the output buffer list, resolved once per IO cycle so
@@ -115,11 +145,180 @@ RTDeviceMix *RTMixer_DeviceMixCreate(void) {
     atomic_store_explicit(&mix->enabled, false, memory_order_relaxed);
     atomic_store_explicit(&mix->sampleRate, 48000.0, memory_order_relaxed);
     atomic_store_explicit(&mix->lastHostTime, 0, memory_order_relaxed);
+
+    atomic_store_explicit(&mix->eqEnabled, false, memory_order_relaxed);
+    atomic_store_explicit(&mix->eqBandCount, 0, memory_order_relaxed);
+    atomic_store_explicit(&mix->activeCoeffSet, 0, memory_order_relaxed);
+    mix->storedBandCount = 0;
+
+    atomic_store_explicit(&mix->limiterEnabled, true, memory_order_relaxed);
+    atomic_store_explicit(&mix->limiterThreshold, 0.9885f, memory_order_relaxed); // -0.1 dBFS
+    atomic_store_explicit(&mix->limiterReleaseMs, 80.0f, memory_order_relaxed);
+    mix->limiterEnvelope = 0.0f;
+    mix->limiterCurrentGain = 1.0f;
     return mix;
 }
 
 void RTMixer_DeviceMixDestroy(RTDeviceMix *mix) {
     free(mix);
+}
+
+static void RTComputeBiquadCoeffs(
+    const RTEQBand *band,
+    double sampleRate,
+    RTBiquadCoeffs *outCoeffs
+) {
+    if (band == NULL || sampleRate <= 0.0) {
+        outCoeffs->b0 = 1.0f;
+        outCoeffs->b1 = 0.0f;
+        outCoeffs->b2 = 0.0f;
+        outCoeffs->a1 = 0.0f;
+        outCoeffs->a2 = 0.0f;
+        outCoeffs->active = false;
+        return;
+    }
+
+    const double gainDb = band->gainDb;
+    if (fabs(gainDb) < 0.01) {
+        outCoeffs->b0 = 1.0f;
+        outCoeffs->b1 = 0.0f;
+        outCoeffs->b2 = 0.0f;
+        outCoeffs->a1 = 0.0f;
+        outCoeffs->a2 = 0.0f;
+        outCoeffs->active = false;
+        return;
+    }
+
+    double freq = band->frequency;
+    const double nyquist = sampleRate * 0.49;
+    if (freq < 10.0) freq = 10.0;
+    if (freq > nyquist) freq = nyquist;
+
+    double q = band->q;
+    if (q < 0.1) q = 0.1;
+    if (q > 10.0) q = 10.0;
+
+    const double A = pow(10.0, gainDb / 40.0);
+    const double w0 = 2.0 * M_PI * freq / sampleRate;
+    const double cosw = cos(w0);
+    const double sinw = sin(w0);
+
+    double b0 = 1.0, b1 = 0.0, b2 = 0.0, a0 = 1.0, a1 = 0.0, a2 = 0.0;
+
+    switch (band->type) {
+    case RT_EQ_FILTER_LOW_SHELF: {
+        double term = (A + 1.0 / A) * (1.0 / q - 1.0) + 2.0;
+        if (term < 0.0) term = 0.0;
+        const double alpha = (sinw / 2.0) * sqrt(term);
+        const double twoSqrtAAlpha = 2.0 * sqrt(A) * alpha;
+
+        b0 = A * ((A + 1.0) - (A - 1.0) * cosw + twoSqrtAAlpha);
+        b1 = 2.0 * A * ((A - 1.0) - (A + 1.0) * cosw);
+        b2 = A * ((A + 1.0) - (A - 1.0) * cosw - twoSqrtAAlpha);
+        a0 = (A + 1.0) + (A - 1.0) * cosw + twoSqrtAAlpha;
+        a1 = -2.0 * ((A - 1.0) + (A + 1.0) * cosw);
+        a2 = (A + 1.0) + (A - 1.0) * cosw - twoSqrtAAlpha;
+        break;
+    }
+    case RT_EQ_FILTER_HIGH_SHELF: {
+        double term = (A + 1.0 / A) * (1.0 / q - 1.0) + 2.0;
+        if (term < 0.0) term = 0.0;
+        const double alpha = (sinw / 2.0) * sqrt(term);
+        const double twoSqrtAAlpha = 2.0 * sqrt(A) * alpha;
+
+        b0 = A * ((A + 1.0) + (A - 1.0) * cosw + twoSqrtAAlpha);
+        b1 = -2.0 * A * ((A - 1.0) + (A + 1.0) * cosw);
+        b2 = A * ((A + 1.0) - (A - 1.0) * cosw - twoSqrtAAlpha);
+        a0 = (A + 1.0) - (A - 1.0) * cosw + twoSqrtAAlpha;
+        a1 = 2.0 * ((A - 1.0) - (A + 1.0) * cosw);
+        a2 = (A + 1.0) - (A - 1.0) * cosw - twoSqrtAAlpha;
+        break;
+    }
+    case RT_EQ_FILTER_PEAKING:
+    default: {
+        const double alpha = sinw / (2.0 * q);
+        b0 = 1.0 + alpha * A;
+        b1 = -2.0 * cosw;
+        b2 = 1.0 - alpha * A;
+        a0 = 1.0 + alpha / A;
+        a1 = -2.0 * cosw;
+        a2 = 1.0 - alpha / A;
+        break;
+    }
+    }
+
+    if (fabs(a0) > 1.0e-9) {
+        outCoeffs->b0 = (float)(b0 / a0);
+        outCoeffs->b1 = (float)(b1 / a0);
+        outCoeffs->b2 = (float)(b2 / a0);
+        outCoeffs->a1 = (float)(a1 / a0);
+        outCoeffs->a2 = (float)(a2 / a0);
+        outCoeffs->active = true;
+    } else {
+        outCoeffs->b0 = 1.0f;
+        outCoeffs->b1 = 0.0f;
+        outCoeffs->b2 = 0.0f;
+        outCoeffs->a1 = 0.0f;
+        outCoeffs->a2 = 0.0f;
+        outCoeffs->active = false;
+    }
+}
+
+static void RTRecalculateEQCoeffs(RTDeviceMix *mix) {
+    const uint32_t currentSet = atomic_load_explicit(&mix->activeCoeffSet, memory_order_relaxed);
+    const uint32_t targetSet = currentSet == 0 ? 1 : 0;
+    const double sampleRate = atomic_load_explicit(&mix->sampleRate, memory_order_relaxed);
+    const uint32_t count = mix->storedBandCount;
+
+    for (uint32_t i = 0; i < count && i < RT_MAX_EQ_BANDS; ++i) {
+        RTComputeBiquadCoeffs(&mix->storedBands[i], sampleRate, &mix->eqCoeffs[targetSet][i]);
+    }
+
+    atomic_store_explicit(&mix->eqBandCount, count, memory_order_relaxed);
+    atomic_store_explicit(&mix->activeCoeffSet, targetSet, memory_order_release);
+}
+
+void RTMixer_DeviceMixSetEQ(
+    RTDeviceMix *mix,
+    bool enabled,
+    const RTEQBand *bands,
+    uint32_t bandCount
+) {
+    if (mix == NULL) return;
+
+    if (bandCount > RT_MAX_EQ_BANDS) {
+        bandCount = RT_MAX_EQ_BANDS;
+    }
+
+    if (bands != NULL && bandCount > 0) {
+        memcpy(mix->storedBands, bands, (size_t)bandCount * sizeof(RTEQBand));
+        mix->storedBandCount = bandCount;
+    } else {
+        mix->storedBandCount = 0;
+    }
+
+    RTRecalculateEQCoeffs(mix);
+    atomic_store_explicit(&mix->eqEnabled, enabled, memory_order_release);
+}
+
+void RTMixer_DeviceMixSetLimiter(
+    RTDeviceMix *mix,
+    bool enabled,
+    float thresholdDb,
+    float releaseMs
+) {
+    if (mix == NULL) return;
+
+    if (thresholdDb > 0.0f) thresholdDb = 0.0f;
+    if (thresholdDb < -30.0f) thresholdDb = -30.0f;
+    const float thresholdLinear = powf(10.0f, thresholdDb / 20.0f);
+
+    if (releaseMs < 10.0f) releaseMs = 10.0f;
+    if (releaseMs > 1000.0f) releaseMs = 1000.0f;
+
+    atomic_store_explicit(&mix->limiterThreshold, thresholdLinear, memory_order_relaxed);
+    atomic_store_explicit(&mix->limiterReleaseMs, releaseMs, memory_order_relaxed);
+    atomic_store_explicit(&mix->limiterEnabled, enabled, memory_order_release);
 }
 
 void RTMixer_DeviceMixPublishSlots(
@@ -162,6 +361,9 @@ void RTMixer_DeviceMixSetSampleRate(RTDeviceMix *mix, double sampleRate) {
         return;
     }
     atomic_store_explicit(&mix->sampleRate, sampleRate, memory_order_relaxed);
+    if (mix->storedBandCount > 0) {
+        RTRecalculateEQCoeffs(mix);
+    }
 }
 
 void RTMixer_DeviceMixSetEnabled(RTDeviceMix *mix, bool enabled) {
@@ -385,6 +587,115 @@ static bool RTClampTargets(
     return clipped;
 }
 
+static inline float RTProcessBiquad(float inSample, const RTBiquadCoeffs *c, RTBiquadState *s) {
+    if (!c->active) {
+        return inSample;
+    }
+    const float outSample = c->b0 * inSample + s->s1;
+    s->s1 = c->b1 * inSample - c->a1 * outSample + s->s2;
+    s->s2 = c->b2 * inSample - c->a2 * outSample;
+
+    // Flush denormals
+    if (fabsf(s->s1) < 1.0e-15f) s->s1 = 0.0f;
+    if (fabsf(s->s2) < 1.0e-15f) s->s2 = 0.0f;
+
+    return outSample;
+}
+
+static void RTApplyEqualizer(
+    RTDeviceMix *mix,
+    const RTOutputTarget *targets,
+    uint32_t targetCount,
+    uint32_t frameCount
+) {
+    if (!atomic_load_explicit(&mix->eqEnabled, memory_order_relaxed)) {
+        return;
+    }
+
+    const uint32_t coeffSet = atomic_load_explicit(&mix->activeCoeffSet, memory_order_acquire);
+    const uint32_t bandCount = atomic_load_explicit(&mix->eqBandCount, memory_order_relaxed);
+    if (bandCount == 0) {
+        return;
+    }
+
+    const RTBiquadCoeffs *coeffs = mix->eqCoeffs[coeffSet];
+
+    for (uint32_t t = 0; t < targetCount && t < 2; ++t) {
+        float *base = targets[t].base;
+        const uint32_t stride = targets[t].stride;
+        RTBiquadState *channelStates = mix->eqState[t];
+
+        for (uint32_t b = 0; b < bandCount; ++b) {
+            const RTBiquadCoeffs *c = &coeffs[b];
+            if (!c->active) {
+                continue;
+            }
+            RTBiquadState *s = &channelStates[b];
+            for (uint32_t f = 0; f < frameCount; ++f) {
+                const size_t index = (size_t)f * stride;
+                base[index] = RTProcessBiquad(base[index], c, s);
+            }
+        }
+    }
+}
+
+static void RTApplyLimiter(
+    RTDeviceMix *mix,
+    const RTOutputTarget *targets,
+    uint32_t targetCount,
+    uint32_t frameCount
+) {
+    if (!atomic_load_explicit(&mix->limiterEnabled, memory_order_relaxed)) {
+        return;
+    }
+
+    const double sr = atomic_load_explicit(&mix->sampleRate, memory_order_relaxed);
+    const float threshold = atomic_load_explicit(&mix->limiterThreshold, memory_order_relaxed);
+    const float releaseMs = atomic_load_explicit(&mix->limiterReleaseMs, memory_order_relaxed);
+    const float releaseSec = (releaseMs > 1.0f ? releaseMs : 80.0f) * 0.001f;
+    const float alphaRel = (float)exp(-1.0 / ((sr > 0.0 ? sr : 48000.0) * releaseSec));
+
+    float env = mix->limiterEnvelope;
+    float gain = mix->limiterCurrentGain;
+
+    for (uint32_t f = 0; f < frameCount; ++f) {
+        float peak = 0.0f;
+        for (uint32_t t = 0; t < targetCount; ++t) {
+            const float absVal = fabsf(targets[t].base[(size_t)f * targets[t].stride]);
+            if (absVal > peak) {
+                peak = absVal;
+            }
+        }
+
+        if (peak > env) {
+            env = peak;
+        } else {
+            env = env * alphaRel + peak * (1.0f - alphaRel);
+        }
+
+        float targetGain = (env > threshold && env > 1.0e-6f) ? (threshold / env) : 1.0f;
+        if (targetGain < gain) {
+            gain = targetGain;
+        } else {
+            gain = gain * alphaRel + targetGain * (1.0f - alphaRel);
+        }
+
+        for (uint32_t t = 0; t < targetCount; ++t) {
+            const size_t index = (size_t)f * targets[t].stride;
+            float val = targets[t].base[index] * gain;
+            if (val > 0.98f) {
+                val = 0.98f + 0.02f * tanhf((val - 0.98f) / 0.02f);
+            } else if (val < -0.98f) {
+                val = -0.98f + 0.02f * tanhf((val + 0.98f) / 0.02f);
+            }
+            targets[t].base[index] = val;
+        }
+    }
+
+    mix->limiterEnvelope = env;
+    mix->limiterCurrentGain = gain;
+}
+
 OSStatus RTMixer_DeviceIOProc(
     AudioObjectID inDevice,
     const AudioTimeStamp *inNow,
@@ -477,6 +788,12 @@ OSStatus RTMixer_DeviceIOProc(
         RTMixSlot(&slots[s], inInputData, targets, targetCount, frameCount);
     }
     atomic_store_explicit(&mix->lastUsedSet, activeSet, memory_order_release);
+
+    // Apply master equalizer if enabled
+    RTApplyEqualizer(mix, targets, targetCount, frameCount);
+
+    // Apply master peak limiter / anti-clipping stage if enabled
+    RTApplyLimiter(mix, targets, targetCount, frameCount);
 
     if (RTClampTargets(targets, targetCount, frameCount)) {
         atomic_fetch_add_explicit(&mix->stats.clipCycles, 1, memory_order_relaxed);

@@ -167,3 +167,76 @@ struct WhiteVolumeSlider: View {
         .accessibilityValue(Text("\(Int((value * 100).rounded()))%"))
     }
 }
+
+struct WhiteVerticalSlider: View {
+    @Binding var value: Double
+    var range: ClosedRange<Double> = -12.0...12.0
+    var isEnabled: Bool = true
+
+    var body: some View {
+        GeometryReader { geo in
+            let knob: CGFloat = 12
+            let trackWidth: CGFloat = 4
+            let travel = max(geo.size.height - knob, 0)
+            let fraction = CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound))
+            let clamped = min(max(fraction, 0), 1)
+            let yOffset = travel * (1 - clamped)
+
+            ZStack(alignment: .top) {
+                // Track background
+                Capsule()
+                    .fill(WonderMixTheme.fill)
+                    .frame(width: trackWidth)
+                    .frame(maxHeight: .infinity)
+
+                // 0 dB center reference line
+                Rectangle()
+                    .fill(WonderMixTheme.inkFaint)
+                    .frame(width: 8, height: 1)
+                    .offset(y: travel * 0.5 + knob * 0.5)
+
+                // Dynamic fill from 0 dB center
+                let centerFraction: CGFloat = 0.5
+                let top = min(clamped, centerFraction)
+                let bottom = max(clamped, centerFraction)
+                let fillHeight = (bottom - top) * travel
+                let fillY = travel * (1 - bottom) + knob * 0.5
+
+                Capsule()
+                    .fill(WonderMixTheme.ink.opacity(0.85))
+                    .frame(width: trackWidth, height: max(fillHeight, 0))
+                    .offset(y: fillY)
+
+                // Thumb knob
+                Circle()
+                    .fill(WonderMixTheme.ink)
+                    .frame(width: knob, height: knob)
+                    .shadow(color: .black.opacity(0.25), radius: 1.5, y: 0.5)
+                    .offset(y: yOffset)
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { drag in
+                        guard isEnabled else { return }
+                        let y = min(max(drag.location.y - knob / 2, 0), travel)
+                        let normalized = travel == 0 ? 0.5 : 1.0 - Double(y / travel)
+                        var next = range.lowerBound + normalized * (range.upperBound - range.lowerBound)
+                        // Magnetic snap to 0 dB
+                        if abs(next) < 0.35 {
+                            next = 0.0
+                        }
+                        value = next
+                    }
+            )
+            .onTapGesture(count: 2) {
+                if isEnabled {
+                    value = 0.0
+                }
+            }
+        }
+        .allowsHitTesting(isEnabled)
+    }
+}
+

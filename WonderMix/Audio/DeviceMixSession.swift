@@ -49,6 +49,7 @@ final class DeviceMixSession {
     private var isRunning = false
     private var mapRetryTask: Task<Void, Never>?
     private var mapRebuildAttempts = 0
+    private var currentEqualizerConfig: EqualizerConfiguration?
 
     /// How long to keep waiting for the HAL to expose the streams of a newly added tap
     /// before giving up on the live update and rebuilding the aggregate.
@@ -154,6 +155,27 @@ final class DeviceMixSession {
         }
     }
 
+    // MARK: - Equalizer & Processing
+
+    func applyEqualizer(_ config: EqualizerConfiguration) {
+        currentEqualizerConfig = config
+        let rtBands = config.bands.map(\.rtBand)
+        rtBands.withUnsafeBufferPointer { buffer in
+            RTMixer_DeviceMixSetEQ(
+                mix,
+                config.isEnabled,
+                buffer.baseAddress,
+                UInt32(buffer.count)
+            )
+        }
+        RTMixer_DeviceMixSetLimiter(
+            mix,
+            config.isLimiterEnabled,
+            config.limiterThresholdDb,
+            config.limiterReleaseMs
+        )
+    }
+
     // MARK: - Diagnostics
 
     func snapshot() -> RTDeviceMixSnapshot {
@@ -240,6 +262,10 @@ final class DeviceMixSession {
         installListeners()
         refreshChannelMap()
         try startDevice()
+
+        if let currentEqualizerConfig {
+            applyEqualizer(currentEqualizerConfig)
+        }
 
         let physicalID = (try? CoreAudioHelper.deviceID(forUID: deviceUID)) ?? kAudioObjectUnknown
         AudioLog.shared.event(

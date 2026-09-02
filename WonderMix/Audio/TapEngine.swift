@@ -16,11 +16,19 @@ final class TapEngine {
     /// every sync would tap and untap the affected apps a few times per minute.
     private var deviceFailures: [String: Date] = [:]
     private static let deviceFailureCooldown: TimeInterval = 15
+    private var currentEqualizerConfig: EqualizerConfiguration?
 
     /// Default output / device list changed — needs full rebuild.
     var onDevicesChange: (() -> Void)?
     /// Process list changed — soft sync only (never tears down audio).
     var onProcessesChange: (() -> Void)?
+
+    func applyEqualizer(_ config: EqualizerConfiguration) {
+        currentEqualizerConfig = config
+        for session in sessions.values {
+            session.applyEqualizer(config)
+        }
+    }
 
     func setGain(_ gain: Float, for key: String) {
         taps[key]?.setGain(gain)
@@ -207,6 +215,9 @@ final class TapEngine {
         }
         do {
             try session.start(taps: deviceTaps)
+            if let currentEqualizerConfig {
+                session.applyEqualizer(currentEqualizerConfig)
+            }
             return session
         } catch {
             AudioLog.shared.warning(
