@@ -10,10 +10,11 @@ struct PermissionView: View {
         VStack(alignment: .leading, spacing: 14) {
             Label("Permissão de áudio", systemImage: "lock.shield")
                 .font(.headline)
+                .foregroundStyle(WonderMixTheme.ink)
 
             Text(statusMessage)
                 .font(.callout)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(WonderMixTheme.inkMuted)
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(spacing: 8) {
@@ -22,26 +23,27 @@ struct PermissionView: View {
                         if isRequesting {
                             ProgressView()
                                 .controlSize(.small)
+                                .tint(WonderMixTheme.orangeDeep)
                         }
                         Text(primaryButtonTitle)
                             .frame(maxWidth: .infinity)
                     }
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(WhiteProminentButtonStyle())
                 .disabled(isRequesting)
                 .keyboardShortcut(.defaultAction)
 
                 if status == .denied || status == .unknown {
                     Button("Já autorizei — verificar de novo", action: onRecheck)
-                        .buttonStyle(.borderless)
+                        .buttonStyle(.plain)
+                        .foregroundStyle(WonderMixTheme.ink)
                         .frame(maxWidth: .infinity)
                 }
             }
 
             Text("Em Ajustes, procure WonderMix em “Gravação de Tela e Áudio do Sistema” (ou “System Audio Recording”) e ative.")
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(WonderMixTheme.inkFaint)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(4)

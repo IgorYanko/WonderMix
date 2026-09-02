@@ -6,15 +6,15 @@ struct WonderMixApp: App {
     @ObservedObject private var controller = MixerController.shared
 
     var body: some Scene {
-        MenuBarExtra("WonderMix", systemImage: "slider.horizontal.3") {
+        MenuBarExtra {
             MixerPopoverView()
                 .environmentObject(controller)
+        } label: {
+            Image("MenuBarIcon")
+                .renderingMode(.template)
+                .opacity(controller.isEnabled ? 1 : 0.45)
+                .accessibilityLabel("WonderMix")
         }
         .menuBarExtraStyle(.window)
-
-        Settings {
-            SettingsView()
-                .environmentObject(controller)
-        }
     }
 }

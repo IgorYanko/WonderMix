@@ -63,6 +63,8 @@ VERSION=v1.0.0 curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/
 - Saída por app (fones, alto-falantes, etc.)
 - Medidor de nível em tempo real
 - Persistência de volume/roteamento por bundle ID
+- Ativar/desativar o mixer sem sair do app (taps são derrubados; o áudio volta ao macOS)
+- Configurações no próprio popover da barra de menu (sem janela separada)
 - Abrir ao iniciar sessão
 - Painel de diagnóstico (Configurações → Diagnóstico) com dropouts, overloads e topologia
 
@@ -71,6 +73,18 @@ VERSION=v1.0.0 curl -fsSL https://raw.githubusercontent.com/IgorYanko/WonderMix/
 1. Abra `WonderMix.xcodeproj` no [Xcode](https://developer.apple.com/xcode/) 16+.
 2. Scheme **WonderMix** → Product → Run (⌘R).
 3. Conceda a permissão de áudio na primeira execução.
+
+### Testes
+
+```bash
+xcodebuild test \
+  -project WonderMix.xcodeproj \
+  -scheme WonderMix \
+  -destination 'platform=macOS' \
+  -enableCodeCoverage YES
+```
+
+No Xcode: Product → Test (⌘U). A cobertura cobre preferências, política de runtime (enable/permissão/visibilidade) e serialização de estado.
 
 ## Publicar um release
 
@@ -95,9 +109,10 @@ O asset publicado deve se chamar **`WonderMix-macOS.zip`**. O cask em `Casks/won
 
 ## Arquitetura
 
-- **SwiftUI** — menu bar (`MenuBarExtra`) + Settings
+- **SwiftUI** — menu bar (`MenuBarExtra`) com mixer e configurações no mesmo popover
 - **Um aggregate por dispositivo de saída** — N process taps misturados num único IOProc
 - **Taps persistentes** — a lista de processos do app é atualizada in-place (sem destruir o tap a cada refresh)
+- **Soft power** — desativar faz `teardownAll()` sem terminar o processo
 - **RTMixer (C)** — ganho, soma e contadores RT-safe, sem alocação na thread do HAL
 
 ## Permissão
