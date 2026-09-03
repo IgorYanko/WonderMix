@@ -1,6 +1,6 @@
 cask "wondermix" do
   version "1.0.0"
-  sha256 "e18da062e086dd990d9a18d8fa3a344607230c07c9f90ac0b5e68f2961a44679"
+  sha256 "a79c647c4e7274f6cdedbe1607227c963c437dbad72411e7c31a7547c132da72"
 
   url "https://github.com/IgorYanko/WonderMix/releases/download/v#{version}/WonderMix-macOS.zip"
   name "WonderMix"
@@ -16,7 +16,18 @@ cask "wondermix" do
 
   app "WonderMix.app"
 
-  zap trash: [
-    "~/Library/Preferences/com.wondermix.app.plist",
-  ]
+  postflight do
+    system_command "xattr",
+                   args: ["-dr", "com.apple.quarantine", "#{appdir}/WonderMix.app"],
+                   sudo: false
+  end
+
+  caveats <<~EOS
+    Se o macOS bloquear a abertura por ser um app sem assinatura paga da Apple:
+      xattr -d com.apple.quarantine /Applications/WonderMix.app
+    Ou instale com:
+      brew install --cask --no-quarantine wondermix
+  EOS
+
+  zap trash: "~/Library/Preferences/com.wondermix.app.plist"
 end
