@@ -12,15 +12,26 @@ struct AppMixerState: Codable, Equatable {
 final class MixerPreferences {
     static let shared = MixerPreferences()
 
-    private let defaults = UserDefaults.standard
+    private let defaults: UserDefaults
     private let statesKey = "wonderMix.appStates"
     private let launchAtLoginKey = "wonderMix.launchAtLogin"
     private let showInactiveKey = "wonderMix.showInactiveApps"
+    private let isEnabledKey = "wonderMix.isEnabled"
 
     private var states: [String: AppMixerState] = [:]
 
-    private init() {
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
         load()
+    }
+
+    /// When unset, defaults to enabled so existing installs keep working.
+    var isEnabled: Bool {
+        get {
+            guard defaults.object(forKey: isEnabledKey) != nil else { return true }
+            return defaults.bool(forKey: isEnabledKey)
+        }
+        set { defaults.set(newValue, forKey: isEnabledKey) }
     }
 
     var launchAtLogin: Bool {

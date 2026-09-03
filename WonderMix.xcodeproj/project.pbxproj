@@ -25,7 +25,21 @@
 		A1000000000000000000000B /* MixerPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* MixerPopoverView.swift */; };
 		A1000000000000000000000C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* SettingsView.swift */; };
 		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* Assets.xcassets */; };
+		A10000000000000000000017 /* MixerRuntimePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000017 /* MixerRuntimePolicy.swift */; };
+		A10000000000000000000018 /* WonderMixTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000018 /* WonderMixTheme.swift */; };
+		B10000000000000000000001 /* MixerPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001 /* MixerPreferencesTests.swift */; };
+		B10000000000000000000002 /* MixerRuntimePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000002 /* MixerRuntimePolicyTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B70000000000000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A90000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A60000000000000000000001;
+			remoteInfo = WonderMix;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		A20000000000000000000001 /* WonderMixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WonderMixApp.swift; sourceTree = "<group>"; };
@@ -50,11 +64,23 @@
 		A2000000000000000000000F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A20000000000000000000010 /* WonderMix.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WonderMix.entitlements; sourceTree = "<group>"; };
 		A20000000000000000000011 /* WonderMix-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WonderMix-Bridging-Header.h"; sourceTree = "<group>"; };
+		A20000000000000000000017 /* MixerRuntimePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerRuntimePolicy.swift; sourceTree = "<group>"; };
+		A20000000000000000000018 /* WonderMixTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WonderMixTheme.swift; sourceTree = "<group>"; };
 		A30000000000000000000001 /* WonderMix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WonderMix.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20000000000000000000001 /* MixerPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerPreferencesTests.swift; sourceTree = "<group>"; };
+		B20000000000000000000002 /* MixerRuntimePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerRuntimePolicyTests.swift; sourceTree = "<group>"; };
+		B20000000000000000000003 /* WonderMixTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WonderMixTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A40000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B30000000000000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -68,6 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				A50000000000000000000002 /* WonderMix */,
+				B40000000000000000000001 /* WonderMixTests */,
 				A50000000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +117,7 @@
 			isa = PBXGroup;
 			children = (
 				A30000000000000000000001 /* WonderMix.app */,
+				B20000000000000000000003 /* WonderMixTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -113,6 +141,7 @@
 				A20000000000000000000014 /* DeviceMixSession.swift */,
 				A20000000000000000000007 /* TapEngine.swift */,
 				A20000000000000000000008 /* MixerController.swift */,
+				A20000000000000000000017 /* MixerRuntimePolicy.swift */,
 				A20000000000000000000012 /* AudioCapturePermission.swift */,
 				A20000000000000000000015 /* AudioLog.swift */,
 				A20000000000000000000016 /* AudioDiagnostics.swift */,
@@ -125,6 +154,7 @@
 		A50000000000000000000006 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				A20000000000000000000018 /* WonderMixTheme.swift */,
 				A2000000000000000000000B /* MixerPopoverView.swift */,
 				A20000000000000000000013 /* PermissionView.swift */,
 				A2000000000000000000000C /* SettingsView.swift */,
@@ -149,6 +179,15 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		B40000000000000000000001 /* WonderMixTests */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000001 /* MixerPreferencesTests.swift */,
+				B20000000000000000000002 /* MixerRuntimePolicyTests.swift */,
+			);
+			path = WonderMixTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -169,6 +208,23 @@
 			productReference = A30000000000000000000001 /* WonderMix.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B50000000000000000000001 /* WonderMixTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B80000000000000000000003 /* Build configuration list for PBXNativeTarget "WonderMixTests" */;
+			buildPhases = (
+				B60000000000000000000001 /* Sources */,
+				B30000000000000000000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B70000000000000000000001 /* PBXTargetDependency */,
+			);
+			name = WonderMixTests;
+			productName = WonderMixTests;
+			productReference = B20000000000000000000003 /* WonderMixTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -181,6 +237,10 @@
 				TargetAttributes = {
 					A60000000000000000000001 = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					B50000000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = A60000000000000000000001;
 					};
 				};
 			};
@@ -199,6 +259,7 @@
 			projectRoot = "";
 			targets = (
 				A60000000000000000000001 /* WonderMix */,
+				B50000000000000000000001 /* WonderMixTests */,
 			);
 		};
 /* End PBXProject section */
@@ -228,18 +289,37 @@
 				A10000000000000000000014 /* DeviceMixSession.swift in Sources */,
 				A10000000000000000000007 /* TapEngine.swift in Sources */,
 				A10000000000000000000008 /* MixerController.swift in Sources */,
+				A10000000000000000000017 /* MixerRuntimePolicy.swift in Sources */,
 				A10000000000000000000012 /* AudioCapturePermission.swift in Sources */,
 				A10000000000000000000015 /* AudioLog.swift in Sources */,
 				A10000000000000000000016 /* AudioDiagnostics.swift in Sources */,
 				A10000000000000000000009 /* RTMixer.c in Sources */,
 				A1000000000000000000000A /* MixerPreferences.swift in Sources */,
+				A10000000000000000000018 /* WonderMixTheme.swift in Sources */,
 				A1000000000000000000000B /* MixerPopoverView.swift in Sources */,
 				A10000000000000000000013 /* PermissionView.swift in Sources */,
 				A1000000000000000000000C /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B60000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B10000000000000000000001 /* MixerPreferencesTests.swift in Sources */,
+				B10000000000000000000002 /* MixerRuntimePolicyTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B70000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A60000000000000000000001 /* WonderMix */;
+			targetProxy = B70000000000000000000002 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A80000000000000000000004 /* Debug */ = {
@@ -331,6 +411,38 @@
 			};
 			name = Release;
 		};
+		B80000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wondermix.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WonderMix.app/Contents/MacOS/WonderMix";
+			};
+			name = Debug;
+		};
+		B80000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wondermix.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WonderMix.app/Contents/MacOS/WonderMix";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -348,6 +460,15 @@
 			buildConfigurations = (
 				A80000000000000000000006 /* Debug */,
 				A80000000000000000000007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B80000000000000000000003 /* Build configuration list for PBXNativeTarget "WonderMixTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B80000000000000000000001 /* Debug */,
+				B80000000000000000000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

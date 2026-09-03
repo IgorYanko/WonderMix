@@ -9,19 +9,13 @@ struct LevelMeterView: View {
             let width = max(0, min(1, CGFloat(level))) * geo.size.width
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(Color.primary.opacity(0.08))
+                    .fill(WonderMixTheme.fill)
                 Capsule()
-                    .fill(meterColor)
+                    .fill(WonderMixTheme.ink.opacity(level > 0.85 ? 1 : 0.9))
                     .frame(width: max(width, level > 0.001 ? 2 : 0))
             }
         }
         .frame(height: 4)
-    }
-
-    private var meterColor: Color {
-        if level > 0.85 { return .red.opacity(0.85) }
-        if level > 0.6 { return .orange.opacity(0.85) }
-        return Color.accentColor.opacity(0.85)
     }
 }
 
@@ -42,18 +36,19 @@ struct AppRowView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(app.name)
                         .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(WonderMixTheme.ink)
                         .lineLimit(1)
                     if !app.isRunningOutput {
                         Text("Inativo")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(WonderMixTheme.inkFaint)
                     }
                 }
                 Spacer(minLength: 8)
                 Button(action: onMute) {
                     Image(systemName: state.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(state.isMuted ? Color.red.opacity(0.9) : Color.secondary)
+                        .foregroundStyle(state.isMuted ? WonderMixTheme.inkFaint : WonderMixTheme.ink)
                         .frame(width: 24, height: 24)
                 }
                 .buttonStyle(.plain)
@@ -61,19 +56,18 @@ struct AppRowView: View {
             }
 
             HStack(spacing: 8) {
-                Slider(
+                WhiteVolumeSlider(
                     value: Binding(
                         get: { Double(state.volume) },
                         set: { onVolume(Float($0)) }
                     ),
-                    in: 0...1.5
+                    isEnabled: !state.isMuted
                 )
-                .disabled(state.isMuted)
                 .opacity(state.isMuted ? 0.45 : 1)
 
                 Text(volumeLabel)
                     .font(.system(size: 11, weight: .medium).monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(WonderMixTheme.inkMuted)
                     .frame(width: 40, alignment: .trailing)
             }
 
@@ -101,6 +95,7 @@ struct AppRowView: View {
             .labelsHidden()
             .pickerStyle(.menu)
             .controlSize(.small)
+            .tint(WonderMixTheme.ink)
         }
         .padding(.vertical, 6)
     }
@@ -119,12 +114,12 @@ struct AppRowView: View {
                 .cornerRadius(6)
         } else {
             RoundedRectangle(cornerRadius: 6)
-                .fill(Color.primary.opacity(0.08))
+                .fill(WonderMixTheme.fill)
                 .frame(width: 28, height: 28)
                 .overlay {
                     Image(systemName: "app.fill")
                         .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(WonderMixTheme.inkMuted)
                 }
         }
     }
@@ -132,30 +127,61 @@ struct AppRowView: View {
 
 struct MixerPopoverView: View {
     @EnvironmentObject private var controller: MixerController
+    @State private var showsSettings = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            Divider()
+            Rectangle()
+                .fill(WonderMixTheme.hairline)
+                .frame(height: 1)
             content
-            Divider()
+            Rectangle()
+                .fill(WonderMixTheme.hairline)
+                .frame(height: 1)
             footer
         }
         .frame(width: 360)
         .frame(maxHeight: 520)
+        .foregroundStyle(WonderMixTheme.ink)
+        .background(OrangeBlurBackground())
+        .background(ClearPopoverWindow())
+        .preferredColorScheme(.dark)
         .onAppear {
             controller.refreshPermissionStatus(andRebuildIfGranted: true)
         }
     }
 
     private var header: some View {
-        HStack {
-            Text("WonderMix")
-                .font(.system(size: 15, weight: .bold))
-            Spacer()
-            Text("\(controller.apps.filter(\.isRunningOutput).count) ativos")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+        HStack(spacing: 10) {
+            if showsSettings {
+                Button {
+                    showsSettings = false
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(WonderMixTheme.ink)
+                }
+                .buttonStyle(.plain)
+                .help("Voltar ao mixer")
+
+                Text("Configurações")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(WonderMixTheme.ink)
+                Spacer()
+            } else {
+                Text("WonderMix")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(WonderMixTheme.ink)
+                Spacer()
+                Toggle("WonderMix ativo", isOn: Binding(
+                    get: { controller.isEnabled },
+                    set: { controller.setEnabled($0) }
+                ))
+                .toggleStyle(WhiteSwitchStyle())
+                .labelsHidden()
+                .help(controller.isEnabled ? "Desativar WonderMix" : "Ativar WonderMix")
+            }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
@@ -163,7 +189,15 @@ struct MixerPopoverView: View {
 
     @ViewBuilder
     private var content: some View {
-        if !controller.hasPermission {
+        if showsSettings {
+            ScrollView {
+                SettingsPanelView()
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+            }
+        } else if !controller.isEnabled {
+            disabledState
+        } else if !controller.hasPermission {
             PermissionView(
                 status: controller.permissionStatus,
                 isRequesting: controller.isRequestingPermission,
@@ -175,10 +209,10 @@ struct MixerPopoverView: View {
             VStack(spacing: 8) {
                 Image(systemName: "speaker.slash")
                     .font(.system(size: 28, weight: .light))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(WonderMixTheme.inkMuted)
                 Text("Nenhum app reproduzindo áudio")
                     .font(.callout)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(WonderMixTheme.inkMuted)
             }
             .frame(maxWidth: .infinity)
             .padding(28)
@@ -197,7 +231,10 @@ struct MixerPopoverView: View {
                             onDevice: { controller.setOutputDevice(uid: $0, for: app) }
                         )
                         if app.key != controller.apps.last?.key {
-                            Divider().padding(.leading, 38)
+                            Rectangle()
+                                .fill(WonderMixTheme.hairline)
+                                .frame(height: 1)
+                                .padding(.leading, 38)
                         }
                     }
                 }
@@ -207,17 +244,45 @@ struct MixerPopoverView: View {
         }
     }
 
+    private var disabledState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "power.circle")
+                .font(.system(size: 28, weight: .light))
+                .foregroundStyle(WonderMixTheme.inkMuted)
+            Text("WonderMix desativado")
+                .font(.callout.weight(.semibold))
+                .foregroundStyle(WonderMixTheme.ink)
+            Text("O áudio dos apps segue pelo macOS. Ative de novo para controlar volume e saída.")
+                .font(.caption)
+                .foregroundStyle(WonderMixTheme.inkMuted)
+                .multilineTextAlignment(.center)
+            Button("Ativar") {
+                controller.setEnabled(true)
+            }
+            .buttonStyle(WhiteProminentButtonStyle())
+        }
+        .frame(maxWidth: .infinity)
+        .padding(28)
+    }
+
     private var footer: some View {
         HStack {
-            SettingsLink {
-                Label("Configurações", systemImage: "gearshape")
+            Button {
+                showsSettings.toggle()
+            } label: {
+                Label(
+                    showsSettings ? "Mixer" : "Configurações",
+                    systemImage: showsSettings ? "slider.horizontal.3" : "gearshape"
+                )
+                .foregroundStyle(WonderMixTheme.ink)
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
             Spacer()
             Button("Sair") {
                 NSApplication.shared.terminate(nil)
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
+            .foregroundStyle(WonderMixTheme.ink)
         }
         .font(.callout)
         .padding(.horizontal, 14)

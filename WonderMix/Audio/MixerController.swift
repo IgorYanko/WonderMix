@@ -14,16 +14,25 @@ final class MixerController: ObservableObject {
     @Published private(set) var permissionStatus: AudioCapturePermission.Status = .unknown
     @Published private(set) var isRequestingPermission = false
     var hasPermission: Bool { permissionStatus.isGranted }
+    /// Soft power switch: app stays in the menu bar, taps/aggregates are torn down while off.
+    @Published var isEnabled: Bool = true {
+        didSet {
+            guard !isSyncingPreferences else { return }
+            guard oldValue != isEnabled else { return }
+            preferences.isEnabled = isEnabled
+            applyEnabledState()
+        }
+    }
     @Published var launchAtLogin: Bool = false {
         didSet {
-            guard !isSyncingLoginItem else { return }
+            guard !isSyncingPreferences else { return }
             preferences.launchAtLogin = launchAtLogin
             applyLoginItemPreference()
         }
     }
     @Published var showInactiveApps: Bool = false {
         didSet {
-            guard !isSyncingLoginItem else { return }
+            guard !isSyncingPreferences else { return }
             preferences.showInactiveApps = showInactiveApps
             refresh(forceRebuild: false)
         }
@@ -42,17 +51,18 @@ final class MixerController: ObservableObject {
     private var processDebounce: Task<Void, Never>?
     private var permissionPollTask: Task<Void, Never>?
     private var didStart = false
-    private var isSyncingLoginItem = false
+    private var isSyncingPreferences = false
     private var activationObserver: NSObjectProtocol?
     /// Every app Core Audio knows about; `apps` is only the filtered UI view.
     private var allApps: [AudioApp] = []
     private var lastDefaultOutputUID: String?
 
     private init() {
-        isSyncingLoginItem = true
+        isSyncingPreferences = true
+        isEnabled = preferences.isEnabled
         launchAtLogin = preferences.launchAtLogin
         showInactiveApps = preferences.showInactiveApps
-        isSyncingLoginItem = false
+        isSyncingPreferences = false
         permissionStatus = AudioCapturePermission.currentStatus()
         engine.onDevicesChange = { [weak self] in
             self?.scheduleRefresh(forceRebuild: false, delayNs: 300_000_000)
@@ -80,7 +90,7 @@ final class MixerController: ObservableObject {
         }
         diagnosticsTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
-                guard let self else { return }
+                guard let self, self.isEnabled else { return }
                 self.diagnostics.update(sessions: self.engine.activeSessions())
             }
         }
@@ -93,6 +103,22 @@ final class MixerController: ObservableObject {
             Task { @MainActor in
                 self?.refreshPermissionStatus(andRebuildIfGranted: true)
             }
+        }
+    }
+
+    func setEnabled(_ enabled: Bool) {
+        isEnabled = enabled
+    }
+
+    private func applyEnabledState() {
+        if isEnabled {
+            AudioLog.shared.event(.route, "WonderMix enabled")
+            refresh(forceRebuild: true)
+        } else {
+            AudioLog.shared.event(.route, "WonderMix disabled")
+            engine.teardownAll()
+            peaks = [:]
+            diagnostics.update(sessions: [])
         }
     }
 
@@ -247,7 +273,7 @@ final class MixerController: ObservableObject {
             appStates[app.key] = preferences.state(forBundleID: app.key)
         }
 
-        guard hasPermission else {
+        guard MixerRuntimePolicy.shouldDriveAudio(isEnabled: isEnabled, hasPermission: hasPermission) else {
             engine.teardownAll()
             return
         }
@@ -276,13 +302,21 @@ final class MixerController: ObservableObject {
     /// Inactive apps are hidden from the mixer, but they keep their tap so a helper that
     /// resumes playback does not need the tap to be rebuilt.
     private func visibleApps(from source: [AudioApp]) -> [AudioApp] {
-        guard !showInactiveApps else { return source }
-        return source.filter { app in
-            app.isRunningOutput || (appStates[app.key] ?? .default) != .default
+        source.filter { app in
+            let custom = (appStates[app.key] ?? .default) != .default
+            return MixerRuntimePolicy.isVisible(
+                isRunningOutput: app.isRunningOutput,
+                showInactiveApps: showInactiveApps,
+                hasCustomState: custom
+            )
         }
     }
 
     private func updatePeaks() {
+        guard isEnabled else {
+            if !peaks.isEmpty { peaks = [:] }
+            return
+        }
         var next: [String: Float] = [:]
         for app in apps {
             let raw = engine.peakLevel(for: app.key)
@@ -313,10 +347,10 @@ final class MixerController: ObservableObject {
     /// Aligns the toggle with the real SMAppService status without calling register/unregister.
     private func syncLoginItemFromSystem() {
         let enabled = SMAppService.mainApp.status == .enabled
-        isSyncingLoginItem = true
+        isSyncingPreferences = true
         launchAtLogin = enabled
         preferences.launchAtLogin = enabled
-        isSyncingLoginItem = false
+        isSyncingPreferences = false
         loginItemMessage = nil
     }
 
@@ -343,10 +377,10 @@ final class MixerController: ObservableObject {
             }
         } catch {
             // Revert toggle to whatever the system actually has.
-            isSyncingLoginItem = true
+            isSyncingPreferences = true
             launchAtLogin = (service.status == .enabled)
             preferences.launchAtLogin = launchAtLogin
-            isSyncingLoginItem = false
+            isSyncingPreferences = false
 
             if Self.isRunningFromDevelopmentBuild {
                 loginItemMessage =
