@@ -1,6 +1,6 @@
 cask "wondermix" do
   version "1.0.0"
-  sha256 "8011e44a8b9ddd8b3e0c08872ef25a94a757b21f6e939e4ac309ad5d544441a0"
+  sha256 "e18da062e086dd990d9a18d8fa3a344607230c07c9f90ac0b5e68f2961a44679"
 
   url "https://github.com/IgorYanko/WonderMix/releases/download/v#{version}/WonderMix-macOS.zip"
   name "WonderMix"
